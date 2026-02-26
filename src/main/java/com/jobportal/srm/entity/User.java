@@ -1,5 +1,6 @@
 package com.jobportal.srm.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jobportal.srm.enums.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -26,6 +27,7 @@ import lombok.Setter;
         private String email;
 
         @Column(nullable = false)
+        @JsonIgnore//to hide password in json response
         private String password;
 
         @Enumerated(EnumType.STRING)
