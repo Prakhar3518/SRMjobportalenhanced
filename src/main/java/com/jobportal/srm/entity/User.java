@@ -27,7 +27,7 @@ import lombok.Setter;
         private String email;
 
         @Column(nullable = false)
-        @JsonIgnore//to hide password in json response
+
         private String password;
 
         @Enumerated(EnumType.STRING)
