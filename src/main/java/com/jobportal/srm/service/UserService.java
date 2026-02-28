@@ -3,6 +3,7 @@ package com.jobportal.srm.service;
 import com.jobportal.srm.entity.User;
 import com.jobportal.srm.repository.UserRepository;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 
 @Service
@@ -14,7 +15,9 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    //User register:
+    // ========================
+    // USER REGISTER
+    // ========================
     public User registerUser(User user) {
 
         if (userRepository.existsByEmail(user.getEmail())) {
@@ -24,12 +27,16 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    //All users:
+    // ========================
+    // GET ALL USERS
+    // ========================
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
-    //User Login:
+    // ========================
+    // USER LOGIN
+    // ========================
     public User loginUser(String email, String password) {
 
         User user = userRepository.findByEmail(email);

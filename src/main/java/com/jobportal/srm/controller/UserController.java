@@ -1,5 +1,7 @@
 package com.jobportal.srm.controller;
 
+import com.jobportal.srm.dto.LoginRequest;
+import com.jobportal.srm.dto.UserResponse;
 import com.jobportal.srm.entity.User;
 import com.jobportal.srm.service.UserService;
 import org.springframework.web.bind.annotation.*;
@@ -28,8 +30,19 @@ public class UserController {
 
     //User login:
     @PostMapping("/login")
-    public User login(@RequestBody User user) {
-        return userService.loginUser(user.getEmail(), user.getPassword());
+    public UserResponse login(@RequestBody LoginRequest request) {
+
+        User user = userService.loginUser(
+                request.getEmail(),
+                request.getPassword()
+        );
+
+        return new UserResponse(
+                user.getId(),
+                user.getName(),
+                user.getEmail(),
+                user.getRole()
+        );
     }
 
 }
