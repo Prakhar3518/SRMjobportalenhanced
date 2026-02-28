@@ -3,6 +3,7 @@ package com.jobportal.srm.service;
 import com.jobportal.srm.dto.RegisterRequest;
 import com.jobportal.srm.entity.User;
 import com.jobportal.srm.repository.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,9 +12,11 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     // ========================
@@ -28,7 +31,7 @@ public class UserService {
         User user = new User();
         user.setName(request.getName());
         user.setEmail(request.getEmail());
-        user.setPassword(request.getPassword()); // will hash later
+        user.setPassword(passwordEncoder.encode(request.getPassword())); // hashed password
         user.setRole(request.getRole());
 
         return userRepository.save(user);
@@ -64,7 +67,7 @@ public class UserService {
             throw new RuntimeException("User not found");
         }
 
-        if (!user.getPassword().equals(password)) {
+        if (!passwordEncoder.matches(password, user.getPassword())) { //Bcryted password
             throw new RuntimeException("Invalid password");
         }
 
