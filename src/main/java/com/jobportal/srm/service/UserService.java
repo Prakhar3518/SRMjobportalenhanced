@@ -1,5 +1,6 @@
 package com.jobportal.srm.service;
 
+import com.jobportal.srm.dto.RegisterRequest;
 import com.jobportal.srm.entity.User;
 import com.jobportal.srm.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,22 @@ public class UserService {
     // ========================
     // USER REGISTER
     // ========================
+    public User registerUser(RegisterRequest request) {
+
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("Email already exists");
+        }
+
+        User user = new User();
+        user.setName(request.getName());
+        user.setEmail(request.getEmail());
+        user.setPassword(request.getPassword()); // will hash later
+        user.setRole(request.getRole());
+
+        return userRepository.save(user);
+    }
+
+    /*  old register version without dto
     public User registerUser(User user) {
 
         if (userRepository.existsByEmail(user.getEmail())) {
@@ -26,6 +43,8 @@ public class UserService {
 
         return userRepository.save(user);
     }
+    */
+
 
     // ========================
     // GET ALL USERS
