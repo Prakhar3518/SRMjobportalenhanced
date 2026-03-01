@@ -5,6 +5,7 @@ import com.jobportal.srm.dto.RegisterRequest;
 import com.jobportal.srm.dto.UserResponse;
 import com.jobportal.srm.entity.User;
 import com.jobportal.srm.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,7 +22,7 @@ public class UserController {
 
 
     @PostMapping("/register")
-    public UserResponse register(@RequestBody RegisterRequest request) {
+    public UserResponse register(@Valid @RequestBody RegisterRequest request) {
 
         User user = userService.registerUser(request);
 
