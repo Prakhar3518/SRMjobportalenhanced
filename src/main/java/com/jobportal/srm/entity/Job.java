@@ -24,9 +24,12 @@ public class Job {
     private Long id;
     // Primary key, auto-increment
 
-    @Column(name = "company_id", nullable = false)
-    private Long companyId;
-    // Foreign key reference (we will later convert to relationship)
+
+    //private Long companyId;
+    @ManyToOne
+    @JoinColumn(name = "company_id")
+    private Company company;
+    // Foreign key reference
 
     @Column(nullable = false)
     private String title;
