@@ -31,6 +31,7 @@ public class Job {
     private Company company;
     // Foreign key reference
 
+
     @Column(nullable = false)
     private String title;
     // Job title
