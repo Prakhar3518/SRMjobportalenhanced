@@ -25,6 +25,7 @@ public class Job {
     // Primary key, auto-increment
 
 
+
     //private Long companyId;
     @ManyToOne
     @JoinColumn(name = "company_id")
