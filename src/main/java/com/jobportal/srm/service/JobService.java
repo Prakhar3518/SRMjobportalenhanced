@@ -58,7 +58,35 @@ public class JobService {
                 .collect(Collectors.toList());
     }
 
+    //Update Job
 
+    public JobResponse updateJob(Long id, JobRequest request) {
+
+        Job job = jobRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Job not found"));
+        // Find job or throw error
+
+        Company company = companyRepository.findById(request.getCompanyId())
+                .orElseThrow(() -> new RuntimeException("Company not found"));
+        // Validate company exists
+
+        if (!company.getApproved()) {
+            throw new RuntimeException("Company is not approved");
+        }
+        // Only approved companies can update jobs
+
+        job.setCompany(company); // update company
+        job.setTitle(request.getTitle()); // update title
+        job.setDescription(request.getDescription()); // update description
+        job.setMinCgpa(request.getMinCgpa()); // update cgpa
+        job.setRequiredSkills(request.getRequiredSkills()); // update skills
+        job.setLocation(request.getLocation()); // update location
+        job.setDeadline(request.getDeadline()); // update deadline
+
+        Job updated = jobRepository.save(job); // save updated job
+
+        return mapToResponse(updated); // return DTO response
+    }
 
 
 

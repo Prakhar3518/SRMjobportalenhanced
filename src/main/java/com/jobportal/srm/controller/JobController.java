@@ -30,4 +30,14 @@ public class JobController {
 
         return jobService.getAllJobs();
     }
+
+
+    //Update job
+    @PutMapping("/{id}")
+    public JobResponse updateJob(
+            @PathVariable Long id,
+            @RequestBody JobRequest request
+    ) {
+        return jobService.updateJob(id, request);
+    }
 }
