@@ -1,13 +1,14 @@
 package com.jobportal.srm.controller;
 
-import com.jobportal.srm.entity.Company; // Import entity
-import com.jobportal.srm.service.CompanyService; // Import service
+import com.jobportal.srm.dto.CompanyRequest;
+import com.jobportal.srm.dto.CompanyResponse;
+import com.jobportal.srm.service.CompanyService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController // Marks as REST controller
-@RequestMapping("/companies") // Base URL
+@RestController
+@RequestMapping("/companies")
 public class CompanyController {
 
     private final CompanyService companyService;
@@ -16,32 +17,31 @@ public class CompanyController {
         this.companyService = companyService; // Inject service
     }
 
-
     // Create company
     @PostMapping
-    public Company createCompany(@RequestBody Company company) {
-        return companyService.createCompany(company);
-        // Calls service to save company
+    public CompanyResponse createCompany(@RequestBody CompanyRequest request) {
+
+        return companyService.createCompany(request); // Call service
     }
 
     // Get all companies
     @GetMapping
-    public List<Company> getAllCompanies() {
+    public List<CompanyResponse> getAllCompanies() {
+
         return companyService.getAllCompanies();
-        // Returns list of companies
     }
 
-    // Get company by id
+    // Get company by ID
     @GetMapping("/{id}")
-    public Company getCompanyById(@PathVariable Long id) {
+    public CompanyResponse getCompanyById(@PathVariable Long id) {
+
         return companyService.getCompanyById(id);
-        // Fetch specific company
     }
 
     // Approve company
     @PutMapping("/{id}/approve")
-    public Company approveCompany(@PathVariable Long id) {
+    public CompanyResponse approveCompany(@PathVariable Long id) {
+
         return companyService.approveCompany(id);
-        // Marks company as approved
     }
 }

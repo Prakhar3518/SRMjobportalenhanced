@@ -1,57 +1,79 @@
 package com.jobportal.srm.service;
 
-import com.jobportal.srm.entity.Company; // Import Company entity
-import com.jobportal.srm.repository.CompanyRepository; // Import repository
-import org.springframework.stereotype.Service; // Marks as service layer
+import com.jobportal.srm.dto.CompanyRequest; // DTO for incoming request
+import com.jobportal.srm.dto.CompanyResponse; // DTO for outgoing response
+import com.jobportal.srm.entity.Company; // Entity
+import com.jobportal.srm.repository.CompanyRepository; // Repository
+import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime; // For created_at
-import java.util.List; // For list return
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
-@Service // Spring manages this class
+@Service
 public class CompanyService {
 
     private final CompanyRepository companyRepository;
 
     public CompanyService(CompanyRepository companyRepository) {
-        this.companyRepository = companyRepository; // Constructor injection
+        this.companyRepository = companyRepository; // Inject repository
     }
 
-    // Create new company
-    public Company createCompany(Company company) {
+    // Create company
+    public CompanyResponse createCompany(CompanyRequest request) {
 
-        company.setApproved(false);
-        // Default: company is not approved initially
+        Company company = new Company(); // Create entity object
 
-        company.setCreatedAt(LocalDateTime.now());
-        // Set creation timestamp
+        company.setCompanyName(request.getCompanyName()); // Set name from DTO
+        company.setDescription(request.getDescription()); // Set description
+        company.setApproved(false); // Default approval false
+        company.setCreatedAt(LocalDateTime.now()); // Set creation timestamp
 
-        return companyRepository.save(company);
-        // Save company to database
+        Company saved = companyRepository.save(company); // Save in DB
+
+        return mapToResponse(saved); // Convert entity → response DTO
     }
 
     // Get all companies
-    public List<Company> getAllCompanies() {
-        return companyRepository.findAll();
-        // Fetch all companies
+    public List<CompanyResponse> getAllCompanies() {
+
+        return companyRepository.findAll()
+                .stream()
+                .map(this::mapToResponse) // Convert each entity → DTO
+                .collect(Collectors.toList());
     }
 
     // Get company by ID
-    public Company getCompanyById(Long id) {
-        return companyRepository.findById(id)
+    public CompanyResponse getCompanyById(Long id) {
+
+        Company company = companyRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Company not found"));
-        // Return company or throw error
+
+        return mapToResponse(company);
     }
 
-    // Approve company (admin action later)
-    public Company approveCompany(Long id) {
+    // Approve company
+    public CompanyResponse approveCompany(Long id) {
 
-        Company company = getCompanyById(id);
-        // Fetch company first
+        Company company = companyRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Company not found"));
 
-        company.setApproved(true);
-        // Mark as approved
+        company.setApproved(true); // Mark approved
 
-        return companyRepository.save(company);
-        // Save updated company
+        Company saved = companyRepository.save(company);
+
+        return mapToResponse(saved);
+    }
+
+    // Helper method: Entity → DTO
+    private CompanyResponse mapToResponse(Company company) {
+
+        return new CompanyResponse(
+                company.getId(),
+                company.getCompanyName(),
+                company.getDescription(),
+                company.getApproved(),
+                company.getCreatedAt()
+        );
     }
 }

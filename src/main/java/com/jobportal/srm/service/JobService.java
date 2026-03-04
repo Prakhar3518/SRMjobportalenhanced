@@ -1,70 +1,84 @@
 package com.jobportal.srm.service;
 
-import com.jobportal.srm.entity.Company; // Company entity
-import com.jobportal.srm.entity.Job; // Job entity
-import com.jobportal.srm.repository.CompanyRepository; // Company repository
-import com.jobportal.srm.repository.JobRepository; // Job repository
+import com.jobportal.srm.dto.JobRequest;
+import com.jobportal.srm.dto.JobResponse;
+import com.jobportal.srm.entity.Company;
+import com.jobportal.srm.entity.Job;
+import com.jobportal.srm.repository.CompanyRepository;
+import com.jobportal.srm.repository.JobRepository;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime; // For createdAt timestamp
-import java.util.List; // For returning list of jobs
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class JobService {
 
     private final JobRepository jobRepository;
     private final CompanyRepository companyRepository;
-    //Jo bhi inject krna ho usko constructor use krke idhr ek saath krte hein
 
-
-
-    // Single constructor injection
     public JobService(JobRepository jobRepository, CompanyRepository companyRepository) {
         this.jobRepository = jobRepository;
         this.companyRepository = companyRepository;
     }
 
-    // Create a new job
-    public Job createJob(Job job) {
+    // Create job
+    public JobResponse createJob(JobRequest request) {
 
-        Company company = job.getCompany();
-        // Get company object from request
-
-        if (company == null || company.getId() == null) {
-            throw new RuntimeException("Company must be provided");
-        }
-
-        Company existingCompany = companyRepository.findById(company.getId())
+        Company company = companyRepository.findById(request.getCompanyId())
                 .orElseThrow(() -> new RuntimeException("Company not found"));
-        // Fetch company from DB
 
-        if (!existingCompany.getApproved()) {
+        if (!company.getApproved()) {
             throw new RuntimeException("Company is not approved");
         }
 
-        job.setCompany(existingCompany);
-        // Attach managed company entity
+        Job job = new Job();
 
+        job.setCompany(company);
+        job.setTitle(request.getTitle());
+        job.setDescription(request.getDescription());
+        job.setMinCgpa(request.getMinCgpa());
+        job.setRequiredSkills(request.getRequiredSkills());
+        job.setLocation(request.getLocation());
+        job.setDeadline(request.getDeadline());
         job.setCreatedAt(LocalDateTime.now());
-        // Set creation timestamp
 
-        return jobRepository.save(job);
-        // Save job
+        Job saved = jobRepository.save(job);
+
+        return mapToResponse(saved);
     }
 
-    // Fetch all jobs
-    public List<Job> getAllJobs() {
-        return jobRepository.findAll();
+    // Get all jobs
+    public List<JobResponse> getAllJobs() {
+
+        return jobRepository.findAll()
+                .stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
     }
 
-    // Fetch job by ID
-    public Job getJobById(Long id) {
-        return jobRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Job not found"));
-    }
 
-    // Delete job by ID
-    public void deleteJob(Long id) {
-        jobRepository.deleteById(id);
+
+
+
+
+
+
+
+    // Entity → DTO
+    private JobResponse mapToResponse(Job job) {
+
+        return new JobResponse(
+                job.getId(),
+                job.getCompany().getCompanyName(),
+                job.getTitle(),
+                job.getDescription(),
+                job.getMinCgpa(),
+                job.getRequiredSkills(),
+                job.getLocation(),
+                job.getDeadline(),
+                job.getCreatedAt()
+        );
     }
 }
