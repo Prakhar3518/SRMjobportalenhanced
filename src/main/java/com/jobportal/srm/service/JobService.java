@@ -65,7 +65,6 @@ public class JobService {
 
 
 
-
     // Entity → DTO
     private JobResponse mapToResponse(Job job) {
 
