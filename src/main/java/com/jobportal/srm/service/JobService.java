@@ -12,6 +12,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+//Pagination imports
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
+
 @Service
 public class JobService {
 
@@ -107,5 +113,18 @@ public class JobService {
                 job.getDeadline(),
                 job.getCreatedAt()
         );
+    }
+
+    //Pagination
+    public Page<JobResponse> getJobsPaginated(int page, int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        // Creates pagination object
+
+        Page<Job> jobPage = jobRepository.findAll(pageable);
+        // Fetch jobs with pagination
+
+        return jobPage.map(this::mapToResponse);
+        // Convert Job → JobResponse
     }
 }

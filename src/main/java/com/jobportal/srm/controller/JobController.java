@@ -3,6 +3,7 @@ package com.jobportal.srm.controller;
 import com.jobportal.srm.dto.JobRequest;
 import com.jobportal.srm.dto.JobResponse;
 import com.jobportal.srm.service.JobService;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -39,5 +40,16 @@ public class JobController {
             @RequestBody JobRequest request
     ) {
         return jobService.updateJob(id, request);
+    }
+
+
+
+    //Pagination
+    @GetMapping("/paged")
+    public Page<JobResponse> getJobsPaginated(
+            @RequestParam int page,
+            @RequestParam int size
+    ) {
+        return jobService.getJobsPaginated(page, size);
     }
 }
