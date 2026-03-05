@@ -3,6 +3,7 @@ package com.jobportal.srm.controller;
 import com.jobportal.srm.dto.CompanyRequest;
 import com.jobportal.srm.dto.CompanyResponse;
 import com.jobportal.srm.service.CompanyService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -40,6 +41,7 @@ public class CompanyController {
 
     // Approve company
     @PutMapping("/{id}/approve")
+    @PreAuthorize("hasRole('ADMIN')") // only ADMIN can approve
     public CompanyResponse approveCompany(@PathVariable Long id) {
 
         return companyService.approveCompany(id);

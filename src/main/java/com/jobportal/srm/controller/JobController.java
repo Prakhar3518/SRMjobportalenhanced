@@ -4,6 +4,7 @@ import com.jobportal.srm.dto.JobRequest;
 import com.jobportal.srm.dto.JobResponse;
 import com.jobportal.srm.service.JobService;
 import org.springframework.data.domain.Page;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,6 +21,7 @@ public class JobController {
 
     // Create job
     @PostMapping
+    @PreAuthorize("hasRole('COMPANY')") // only company can post job
     public JobResponse createJob(@RequestBody JobRequest request) {
 
         return jobService.createJob(request);
@@ -35,6 +37,7 @@ public class JobController {
 
     //Update job
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('COMPANY')")
     public JobResponse updateJob(
             @PathVariable Long id,
             @RequestBody JobRequest request
