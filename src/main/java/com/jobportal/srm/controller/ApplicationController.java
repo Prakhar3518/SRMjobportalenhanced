@@ -2,6 +2,7 @@ package com.jobportal.srm.controller;
 
 import com.jobportal.srm.dto.ApplicationRequest;
 import com.jobportal.srm.dto.ApplicationResponse;
+import com.jobportal.srm.dto.ApplicationStatusUpdateRequest;
 import com.jobportal.srm.service.ApplicationService;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,5 +35,18 @@ public class ApplicationController {
     @GetMapping("/job/{id}")
     public List<ApplicationResponse> getByJob(@PathVariable Long id) {
         return applicationService.getApplicationsByJob(id);
+    }
+
+    //Status update (selection or rejection)
+    @PutMapping("/{id}/status")
+    public ApplicationResponse updateStatus(
+            @PathVariable Long id,
+            @RequestBody ApplicationStatusUpdateRequest request
+    ) {
+
+        return applicationService.updateApplicationStatus(
+                id,
+                request.getStatus()
+        );
     }
 }

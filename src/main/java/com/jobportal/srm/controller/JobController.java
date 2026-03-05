@@ -55,4 +55,17 @@ public class JobController {
     ) {
         return jobService.getJobsPaginated(page, size);
     }
+
+    //Searching job
+    @GetMapping("/search")
+    public List<JobResponse> searchJobs(
+
+            @RequestParam(required = false) String location,
+            @RequestParam(required = false) String skill,
+            @RequestParam(required = false) Double cgpa
+
+    ) {
+
+        return jobService.searchJobs(location, skill, cgpa);
+    }
 }

@@ -6,6 +6,8 @@ import com.jobportal.srm.entity.Company;
 import com.jobportal.srm.entity.Job;
 import com.jobportal.srm.repository.CompanyRepository;
 import com.jobportal.srm.repository.JobRepository;
+import com.jobportal.srm.specification.JobSpecification;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -126,5 +128,25 @@ public class JobService {
 
         return jobPage.map(this::mapToResponse);
         // Convert Job → JobResponse
+    }
+
+
+
+    //Searching
+    public List<JobResponse> searchJobs(
+            String location,
+            String skill,
+            Double cgpa
+    ) {
+
+        Specification<Job> spec = Specification
+                .where(JobSpecification.hasLocation(location))
+                .and(JobSpecification.hasSkill(skill))
+                .and(JobSpecification.hasCgpa(cgpa));
+
+        return jobRepository.findAll(spec)
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
     }
 }

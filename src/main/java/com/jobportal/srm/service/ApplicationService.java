@@ -99,4 +99,32 @@ public class ApplicationService {
                 ))
                 .collect(Collectors.toList());
     }
+
+
+
+    //Selection or rejection status
+    public ApplicationResponse updateApplicationStatus(
+            Long applicationId,
+            ApplicationStatus status
+    ) {
+
+        // find application
+        Application application = applicationRepository.findById(applicationId)
+                .orElseThrow(() -> new RuntimeException("Application not found"));
+
+        // update status
+        application.setStatus(status);
+
+        // save updated application
+        Application updated = applicationRepository.save(application);
+
+        // convert entity → DTO
+        return new ApplicationResponse(
+                updated.getId(),
+                updated.getStudent().getId(),
+                updated.getJob().getId(),
+                updated.getStatus(),
+                updated.getAppliedAt()
+        );
+    }
 }
