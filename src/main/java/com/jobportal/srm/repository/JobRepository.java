@@ -10,4 +10,3 @@ public interface JobRepository extends JpaRepository<Job,Long> ,JpaSpecification
     // JpaRepository gives CRUD methods automatically
 
 }
-
