@@ -62,6 +62,7 @@ public class JobController {
         return jobService.getJobsByCompany(id);
     }
 
+
     //Searching job
     @GetMapping("/search")
     public List<JobResponse> searchJobs(
