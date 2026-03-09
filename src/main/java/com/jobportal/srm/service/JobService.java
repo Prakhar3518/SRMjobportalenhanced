@@ -149,4 +149,11 @@ public class JobService {
                 .map(this::mapToResponse)
                 .toList();
     }
+    public List<JobResponse> getJobsByCompany(Long companyId) {
+
+        return jobRepository.findByCompanyId(companyId)
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
 }

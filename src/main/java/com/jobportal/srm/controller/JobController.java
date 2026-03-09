@@ -56,6 +56,12 @@ public class JobController {
         return jobService.getJobsPaginated(page, size);
     }
 
+    @GetMapping("/company/{id}")
+    public List<JobResponse> getJobsByCompany(@PathVariable Long id) {
+
+        return jobService.getJobsByCompany(id);
+    }
+
     //Searching job
     @GetMapping("/search")
     public List<JobResponse> searchJobs(
