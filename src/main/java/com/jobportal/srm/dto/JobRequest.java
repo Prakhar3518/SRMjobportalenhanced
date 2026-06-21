@@ -15,7 +15,6 @@ public class JobRequest {
 
     @NotBlank
     private String title;
-    // Job title
 
     @NotBlank
     private String description;
