@@ -4,6 +4,9 @@ import com.jobportal.srm.dto.ApplicationRequest;
 import com.jobportal.srm.dto.ApplicationResponse;
 import com.jobportal.srm.dto.ApplicationStatusUpdateRequest;
 import com.jobportal.srm.service.ApplicationService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,35 +21,37 @@ public class ApplicationController {
         this.applicationService = applicationService;
     }
 
-
-    // student applies to job
+    // STUDENT applies to a job
     @PostMapping
-    public ApplicationResponse apply(@RequestBody ApplicationRequest request) {
-        return applicationService.applyToJob(request);
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<ApplicationResponse> apply(@RequestBody ApplicationRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(applicationService.applyToJob(request));
     }
 
-    // get applications of a student
+    // Get applications of a student (student views own, admin views any)
     @GetMapping("/student/{id}")
-    public List<ApplicationResponse> getByStudent(@PathVariable Long id) {
-        return applicationService.getApplicationsByStudent(id);
+    @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN')")
+    public ResponseEntity<List<ApplicationResponse>> getByStudent(@PathVariable Long id) {
+        return ResponseEntity.ok(applicationService.getApplicationsByStudent(id));
     }
 
-    // get applicants for a job
+    // Recruiter/Company views applicants for a job
     @GetMapping("/job/{id}")
-    public List<ApplicationResponse> getByJob(@PathVariable Long id) {
-        return applicationService.getApplicationsByJob(id);
+    @PreAuthorize("hasAnyRole('COMPANY', 'ADMIN')")
+    public ResponseEntity<List<ApplicationResponse>> getByJob(@PathVariable Long id) {
+        return ResponseEntity.ok(applicationService.getApplicationsByJob(id));
     }
 
-    //Status update (selection or rejection)
+    // Company/Admin updates application status (shortlist / reject)
     @PutMapping("/{id}/status")
-    public ApplicationResponse updateStatus(
+    @PreAuthorize("hasAnyRole('COMPANY', 'ADMIN')")
+    public ResponseEntity<ApplicationResponse> updateStatus(
             @PathVariable Long id,
             @RequestBody ApplicationStatusUpdateRequest request
     ) {
-
-        return applicationService.updateApplicationStatus(
-                id,
-                request.getStatus()
+        return ResponseEntity.ok(
+                applicationService.updateApplicationStatus(id, request.getStatus())
         );
     }
 }

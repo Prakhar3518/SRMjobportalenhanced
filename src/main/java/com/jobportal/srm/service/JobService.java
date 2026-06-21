@@ -7,18 +7,15 @@ import com.jobportal.srm.entity.Job;
 import com.jobportal.srm.repository.CompanyRepository;
 import com.jobportal.srm.repository.JobRepository;
 import com.jobportal.srm.specification.JobSpecification;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
-
-//Pagination imports
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-
 
 @Service
 public class JobService {
@@ -33,16 +30,14 @@ public class JobService {
 
     // Create job
     public JobResponse createJob(JobRequest request) {
-
         Company company = companyRepository.findById(request.getCompanyId())
                 .orElseThrow(() -> new RuntimeException("Company not found"));
 
         if (!company.getApproved()) {
-            throw new RuntimeException("Company is not approved");
+            throw new RuntimeException("Company is not approved yet");
         }
 
         Job job = new Job();
-
         job.setCompany(company);
         job.setTitle(request.getTitle());
         job.setDescription(request.getDescription());
@@ -52,58 +47,81 @@ public class JobService {
         job.setDeadline(request.getDeadline());
         job.setCreatedAt(LocalDateTime.now());
 
-        Job saved = jobRepository.save(job);
-
-        return mapToResponse(saved);
+        return mapToResponse(jobRepository.save(job));
     }
 
     // Get all jobs
     public List<JobResponse> getAllJobs() {
-
-        return jobRepository.findAll()
-                .stream()
+        return jobRepository.findAll().stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
-    //Update Job
-
-    public JobResponse updateJob(Long id, JobRequest request) {
-
+    // Get job by ID
+    public JobResponse getJobById(Long id) {
         Job job = jobRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Job not found"));
-        // Find job or throw error
+        return mapToResponse(job);
+    }
+
+    // Update job
+    public JobResponse updateJob(Long id, JobRequest request) {
+        Job job = jobRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Job not found"));
 
         Company company = companyRepository.findById(request.getCompanyId())
                 .orElseThrow(() -> new RuntimeException("Company not found"));
-        // Validate company exists
 
         if (!company.getApproved()) {
-            throw new RuntimeException("Company is not approved");
+            throw new RuntimeException("Company is not approved yet");
         }
-        // Only approved companies can update jobs
 
-        job.setCompany(company); // update company
-        job.setTitle(request.getTitle()); // update title
-        job.setDescription(request.getDescription()); // update description
-        job.setMinCgpa(request.getMinCgpa()); // update cgpa
-        job.setRequiredSkills(request.getRequiredSkills()); // update skills
-        job.setLocation(request.getLocation()); // update location
-        job.setDeadline(request.getDeadline()); // update deadline
+        job.setCompany(company);
+        job.setTitle(request.getTitle());
+        job.setDescription(request.getDescription());
+        job.setMinCgpa(request.getMinCgpa());
+        job.setRequiredSkills(request.getRequiredSkills());
+        job.setLocation(request.getLocation());
+        job.setDeadline(request.getDeadline());
 
-        Job updated = jobRepository.save(job); // save updated job
-
-        return mapToResponse(updated); // return DTO response
+        return mapToResponse(jobRepository.save(job));
     }
 
+    // Delete job
+    public void deleteJob(Long id) {
+        if (!jobRepository.existsById(id)) {
+            throw new RuntimeException("Job not found");
+        }
+        jobRepository.deleteById(id);
+    }
 
+    // Paginated jobs
+    public Page<JobResponse> getJobsPaginated(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return jobRepository.findAll(pageable).map(this::mapToResponse);
+    }
 
+    // Jobs by company
+    public List<JobResponse> getJobsByCompany(Long companyId) {
+        return jobRepository.findByCompanyId(companyId).stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
 
+    // Search & filter
+    public List<JobResponse> searchJobs(String location, String skill, Double cgpa) {
+        Specification<Job> spec = Specification
+                .where(JobSpecification.hasLocation(location))
+                .and(JobSpecification.hasSkill(skill))
+                .and(JobSpecification.hasCgpa(cgpa));
 
+        return jobRepository.findAll(spec).stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
 
     // Entity → DTO
     private JobResponse mapToResponse(Job job) {
-
         return new JobResponse(
                 job.getId(),
                 job.getCompany().getCompanyName(),
@@ -115,45 +133,5 @@ public class JobService {
                 job.getDeadline(),
                 job.getCreatedAt()
         );
-    }
-
-    //Pagination
-    public Page<JobResponse> getJobsPaginated(int page, int size) {
-
-        Pageable pageable = PageRequest.of(page, size);
-        // Creates pagination object
-
-        Page<Job> jobPage = jobRepository.findAll(pageable);
-        // Fetch jobs with pagination
-
-        return jobPage.map(this::mapToResponse);
-        // Convert Job → JobResponse
-    }
-
-
-
-    //Searching
-    public List<JobResponse> searchJobs(
-            String location,
-            String skill,
-            Double cgpa
-    ) {
-
-        Specification<Job> spec = Specification
-                .where(JobSpecification.hasLocation(location))
-                .and(JobSpecification.hasSkill(skill))
-                .and(JobSpecification.hasCgpa(cgpa));
-
-        return jobRepository.findAll(spec)
-                .stream()
-                .map(this::mapToResponse)
-                .toList();
-    }
-    public List<JobResponse> getJobsByCompany(Long companyId) {
-
-        return jobRepository.findByCompanyId(companyId)
-                .stream()
-                .map(this::mapToResponse)
-                .toList();
     }
 }

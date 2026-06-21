@@ -3,7 +3,10 @@ package com.jobportal.srm.controller;
 import com.jobportal.srm.dto.JobRequest;
 import com.jobportal.srm.dto.JobResponse;
 import com.jobportal.srm.service.JobService;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,60 +22,65 @@ public class JobController {
         this.jobService = jobService;
     }
 
-    // Create job
+    // Create job - COMPANY or ADMIN
     @PostMapping
-    @PreAuthorize("hasRole('COMPANY')") // only company can post job
-    public JobResponse createJob(@RequestBody JobRequest request) {
-
-        return jobService.createJob(request);
+    @PreAuthorize("hasAnyRole('COMPANY', 'ADMIN')")
+    public ResponseEntity<JobResponse> createJob(@Valid @RequestBody JobRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(jobService.createJob(request));
     }
 
-    // Get all jobs
+    // Get all jobs - public (any authenticated user)
     @GetMapping
-    public List<JobResponse> getAllJobs() {
-
-        return jobService.getAllJobs();
+    public ResponseEntity<List<JobResponse>> getAllJobs() {
+        return ResponseEntity.ok(jobService.getAllJobs());
     }
 
+    // Get job by ID
+    @GetMapping("/{id}")
+    public ResponseEntity<JobResponse> getJobById(@PathVariable Long id) {
+        return ResponseEntity.ok(jobService.getJobById(id));
+    }
 
-    //Update job
+    // Update job - COMPANY or ADMIN only
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('COMPANY')")
-    public JobResponse updateJob(
+    @PreAuthorize("hasAnyRole('COMPANY', 'ADMIN')")
+    public ResponseEntity<JobResponse> updateJob(
             @PathVariable Long id,
-            @RequestBody JobRequest request
+            @Valid @RequestBody JobRequest request
     ) {
-        return jobService.updateJob(id, request);
+        return ResponseEntity.ok(jobService.updateJob(id, request));
     }
 
+    // Delete job - COMPANY or ADMIN only
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('COMPANY', 'ADMIN')")
+    public ResponseEntity<String> deleteJob(@PathVariable Long id) {
+        jobService.deleteJob(id);
+        return ResponseEntity.ok("Job deleted successfully");
+    }
 
-
-    //Pagination
+    // Paginated jobs
     @GetMapping("/paged")
-    public Page<JobResponse> getJobsPaginated(
-            @RequestParam int page,
-            @RequestParam int size
+    public ResponseEntity<Page<JobResponse>> getJobsPaginated(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
     ) {
-        return jobService.getJobsPaginated(page, size);
+        return ResponseEntity.ok(jobService.getJobsPaginated(page, size));
     }
 
+    // Jobs by company
     @GetMapping("/company/{id}")
-    public List<JobResponse> getJobsByCompany(@PathVariable Long id) {
-
-        return jobService.getJobsByCompany(id);
+    public ResponseEntity<List<JobResponse>> getJobsByCompany(@PathVariable Long id) {
+        return ResponseEntity.ok(jobService.getJobsByCompany(id));
     }
 
-
-    //Searching job
+    // Search & filter jobs
     @GetMapping("/search")
-    public List<JobResponse> searchJobs(
-
+    public ResponseEntity<List<JobResponse>> searchJobs(
             @RequestParam(required = false) String location,
             @RequestParam(required = false) String skill,
             @RequestParam(required = false) Double cgpa
-
     ) {
-
-        return jobService.searchJobs(location, skill, cgpa);
+        return ResponseEntity.ok(jobService.searchJobs(location, skill, cgpa));
     }
 }
